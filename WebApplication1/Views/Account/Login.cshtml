@@ -1,0 +1,69 @@
+﻿@model WebApplication1.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Yönetici Girişi";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Dosya Yönetim Portalı</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            background: #f4f6f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            border: 0;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+    <div class="card login-card p-4">
+        <div class="card-body">
+            <h4 class="text-center font-weight-bold mb-1">Dosya Yönetim Portalı</h4>
+            <p class="text-center text-muted small mb-4">Yönetici Paneli Girişi</p>
+
+            <form asp-action="Login" asp-controller="Account" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+
+                <div class="form-group">
+                    <label asp-for="Email">E-posta</label>
+                    <input asp-for="Email" class="form-control" placeholder="admin@portal.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password">Şifre</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label small">Beni hatırla</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block font-weight-bold">Giriş Yap</button>
+            </form>
+
+            <hr />
+            <div class="text-muted small">
+                <strong>Varsayılan Admin:</strong> admin@portal.com<br />
+                <strong>Şifre:</strong> Admin123!
+            </div>
+        </div>
+    </div>
+</body>
+</html>

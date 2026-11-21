@@ -1,0 +1,41 @@
+﻿@model WebApplication1.ViewModels.FileCreateViewModel
+@{
+    ViewData["Title"] = "Yeni Dosya Yükle";
+}
+
+<div class="card border-0 shadow-sm" style="max-width: 650px;">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Files" asp-action="Create" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+
+            <div class="form-group">
+                <label asp-for="FileName">Dosya Adı / Başlığı</label>
+                <input asp-for="FileName" class="form-control" placeholder="Örn: Vize Sunumu, Rapor..." />
+                <span asp-validation-for="FileName" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CategoryId">Klasör / Kategori</label>
+                <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control">
+                    <option value="">-- Kategori Seçin --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="UploadFile">Dosya Seç</label>
+                <input asp-for="UploadFile" type="file" class="form-control-file" />
+                <span asp-validation-for="UploadFile" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group form-check">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label">Aktif olarak yayınla</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Yükle</button>
+            <a asp-area="Admin" asp-controller="Files" asp-action="Index" class="btn btn-secondary">İptal</a>
+        </form>
+    </div>
+</div>

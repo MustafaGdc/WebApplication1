@@ -1,0 +1,154 @@
+﻿@model IEnumerable<WebApplication1.Models.StoredFile>
+@{
+    ViewData["Title"] = "Dosyalar";
+}
+
+<div class="mb-3 text-right">
+    <a asp-area="Admin" asp-controller="Files" asp-action="Create" class="btn btn-primary">
+        + Yeni Dosya Yükle
+    </a>
+</div>
+
+<div id="ajaxAlertArea"></div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="filesTable">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Dosya Adı</th>
+                        <th>Kategori</th>
+                        <th>Uzantı</th>
+                        <th>Boyut</th>
+                        <th>İndirme</th>
+                        <th>Durum</th>
+                        <th style="width: 240px;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            double kb = Math.Round(item.FileSize / 1024.0, 2);
+                            <tr id="row-@item.Id">
+                                <td class="font-weight-bold">@item.FileName</td>
+                                <td>@(item.Category?.Name ?? "-")</td>
+                                <td>@item.FileExtension</td>
+                                <td>@kb KB</td>
+                                <td>@item.DownloadCount</td>
+                                <td>
+                                    <button type="button"
+                                            class="btn btn-sm @(item.IsActive ? "btn-success" : "btn-secondary") btn-toggle-active"
+                                            data-id="@item.Id">
+                                        @(item.IsActive ? "Aktif" : "Pasif")
+                                    </button>
+                                </td>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="Files" asp-action="Download" asp-route-id="@item.Id" class="btn btn-sm btn-info">
+                                        İndir
+                                    </a>
+                                    <a asp-area="Admin" asp-controller="Files" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                        Düzenle
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-danger btn-delete-ajax"
+                                            data-id="@item.Id">
+                                        Sil (AJAX)
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Henüz dosya yüklenmemiş.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var alertArea = document.getElementById("ajaxAlertArea");
+
+            document.querySelectorAll(".btn-toggle-active").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var id = btn.getAttribute("data-id") || "";
+                    var body = new URLSearchParams();
+                    body.append("id", id);
+
+                    fetch("/Admin/Files/ToggleActiveAjax", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: body.toString()
+                    })
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            if (res.success) {
+                                btn.textContent = res.statusText;
+                                if (res.isActive) {
+                                    btn.classList.remove("btn-secondary");
+                                    btn.classList.add("btn-success");
+                                } else {
+                                    btn.classList.remove("btn-success");
+                                    btn.classList.add("btn-secondary");
+                                }
+                                if (alertArea) {
+                                    alertArea.innerHTML = '<div class="alert alert-info alert-dismissible fade show" role="alert">Dosya durumu güncellendi.<button type="button" class="close" data-dismiss="alert" aria-label="Kapat"><span aria-hidden="true">&times;</span></button></div>';
+                                }
+                            } else if (alertArea) {
+                                alertArea.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">İşlem başarısız.<button type="button" class="close" data-dismiss="alert" aria-label="Kapat"><span aria-hidden="true">&times;</span></button></div>';
+                            }
+                        })
+                        .catch(function () {
+                            if (alertArea) {
+                                alertArea.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">AJAX isteği sırasında hata oluştu.<button type="button" class="close" data-dismiss="alert" aria-label="Kapat"><span aria-hidden="true">&times;</span></button></div>';
+                            }
+                        });
+                });
+            });
+
+            document.querySelectorAll(".btn-delete-ajax").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    if (!confirm("Bu dosyayı sayfa yenilemeden silmek istediğine emin misin?")) {
+                        return;
+                    }
+
+                    var id = btn.getAttribute("data-id") || "";
+                    var body = new URLSearchParams();
+                    body.append("id", id);
+
+                    fetch("/Admin/Files/DeleteAjax", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: body.toString()
+                    })
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            if (res.success) {
+                                var row = document.getElementById("row-" + id);
+                                if (row) row.remove();
+                                if (alertArea) {
+                                    alertArea.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert">Dosya silindi.<button type="button" class="close" data-dismiss="alert" aria-label="Kapat"><span aria-hidden="true">&times;</span></button></div>';
+                                }
+                            } else if (alertArea) {
+                                alertArea.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">Silme işlemi başarısız.<button type="button" class="close" data-dismiss="alert" aria-label="Kapat"><span aria-hidden="true">&times;</span></button></div>';
+                            }
+                        })
+                        .catch(function () {
+                            if (alertArea) {
+                                alertArea.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">AJAX silme isteği sırasında hata oluştu.<button type="button" class="close" data-dismiss="alert" aria-label="Kapat"><span aria-hidden="true">&times;</span></button></div>';
+                            }
+                        });
+                });
+            });
+        })();
+    </script>
+}

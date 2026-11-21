@@ -1,0 +1,81 @@
+﻿@model IEnumerable<WebApplication1.Models.StoredFile>
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Toplam Klasör / Kategori</div>
+                <h3 class="font-weight-bold mt-1">@ViewBag.CategoryCount</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Toplam Dosya</div>
+                <h3 class="font-weight-bold mt-1">@ViewBag.FileCount</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Toplam İndirme</div>
+                <h3 class="font-weight-bold mt-1">@ViewBag.TotalDownloads</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small">Toplam Boyut</div>
+                <h3 class="font-weight-bold mt-1">@ViewBag.TotalSizeKb KB</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white font-weight-bold">
+        Son Eklenen Dosyalar
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Dosya Adı</th>
+                        <th>Kategori</th>
+                        <th>Uzantı</th>
+                        <th>İndirme</th>
+                        <th>Tarih</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.FileName</td>
+                                <td>@(item.Category?.Name ?? "-")</td>
+                                <td>@item.FileExtension</td>
+                                <td>@item.DownloadCount</td>
+                                <td>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Henüz dosya eklenmemiş.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
